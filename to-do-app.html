@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0">
+        <title>To do App</title>
+        <style>
+            body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    align-items: center;
+    height: 100vh;
+    background: linear-gradient(85deg, #f32c83, #46b8ff);
+}
+
+.container {
+    width: 450px;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: center;
+}
+
+h1 {
+    font-size: 36px;
+    color: #4A90E2;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.list, .task {
+    margin-bottom: 30px;
+}
+
+h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+ul {
+    padding-left: 0;
+    list-style-type: none;
+}
+
+input[type="text"], input[type="datetime-local"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    margin-top: 5px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="datetime-local"]:focus {
+    outline: none;
+    border-color: #4A90E2;
+    box-shadow: 0 0 10px rgba(74, 144, 226, 0.4);
+}
+
+button {
+    padding: 12px 20px;
+    background-color: #229def;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #f32c83;
+    transform: scale(1.05);
+}
+
+li {
+    padding: 20px;
+    display:flex;
+    justify-content: space-between;
+    border-radius: 10px;
+    margin: 10px 0;
+    background-color: #e4e8ed;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+li:hover {
+    background-color: #e0e7ff;
+}
+
+li.completed {
+    text-decoration:double;
+    color: #777;
+    background-color: #d3f8e2;
+}
+
+li .task-actions button {
+    background-color: #e74c3c;
+    color: white;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.3s ease;
+}
+
+li .task-actions button:hover {
+    background-color: #ea2812;
+    transform: scale(1.05);
+}
+
+        </style>   
+    </head>
+    <body>
+        <div class="container">
+            <h1>To-Do app</h1>
+            <div class="list">
+                <input type="text" id="list-name" placeholder="Enter list name"/>
+                <button onclick="addList()">ADD to YOUR LIST</button>
+                <ul id="list-ul"></ul>
+            </div>
+            <div class="task">
+                <h3>tasks</h3>
+                <input type="text" id="task-name" placeholder="Enter your tasks"/>
+                <input type="datetime-local" id="task-datetime"/>
+                <button onclick="addTask()">ADD YOUR TASKS MA FRND</button>
+                <ul id="task-ul"></ul>
+            </div>
+        </div>
+        <script>
+ let currentList = null;
+let taskLists = {};
+
+function addList() {
+    const listName = document.getElementById("list-name").value.trim();
+    if (!listName) {
+        alert("Please enter a list name.");
+        return;
+    }
+
+    if (!taskLists[listName]) {
+        taskLists[listName] = [];
+        const listUl = document.getElementById("list-ul");
+
+        const li = document.createElement("li");
+        li.textContent = listName;
+        li.onclick = () => loadTasks(listName);
+
+        listUl.appendChild(li);
+        document.getElementById("list-name").value = "";
+    } else {
+        alert("List already exists.");
+    }
+}
+
+function loadTasks(listName) {
+    currentList = listName;
+
+    const taskUl = document.getElementById("task-ul");
+    taskUl.innerHTML = ""; // Clear existing tasks
+
+    taskLists[listName].forEach((task, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            <span>${task.name}</span>
+            <button onclick="toggleTask(${index})">${task.completed ? "Undo" : "Complete"}</button>
+            <button onclick="editTask(${index})">Edit</button>
+            <button onclick="deleteTask(${index})">Delete</button>
+        `;
+        li.style.textDecoration = task.completed ? "line-through" : "none";
+        taskUl.appendChild(li);
+    });
+}
+
+function addTask() {
+    if (!currentList) {
+        alert("Please select a list first.");
+        return;
+    }
+
+    const taskName = document.getElementById("task-name").value.trim();
+    if (!taskName) {
+        alert("Please enter a task description.");
+        return;
+    }
+
+    taskLists[currentList].push({ name: taskName, completed: false });
+    document.getElementById("task-name").value = ""; // Clear input
+    loadTasks(currentList);
+}
+
+function toggleTask(index) {
+    const task = taskLists[currentList][index];
+    task.completed = !task.completed;
+    loadTasks(currentList);
+}
+
+function editTask(index) {
+    const task = taskLists[currentList][index];
+    const newTaskName = prompt("Edit task:", task.name);
+    if (newTaskName) {
+        task.name = newTaskName;
+        loadTasks(currentList);
+    }
+}
+
+function deleteTask(index) {
+    taskLists[currentList].splice(index, 1);
+    loadTasks(currentList);
+}
+
+</script>
+</body>
+</html>
